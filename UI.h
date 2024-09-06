@@ -15,21 +15,19 @@ void SafeCin(T& input,std::string ErrorMessage){
 }
 
 void Delimeter(int count , char symbol){
-    std::cout<<std::endl;
     for(int i=0;i<count;i++){
         std::cout<<symbol;
     }
     std::cout<<std::endl;
 }
 void Delimeter(int count , std::string string){
-    std::cout<<std::endl;
     for(int i=0;i<string.length()/count;i++){
         std::cout<<string;
     }
 }
 
 void PrintMain(){
-    std::cout<<std::setw(100)<<std::internal<<"Терминал обмена валютных пар"<<std::endl;
+    std::cout<<std::setw(80)<<std::internal<<"Терминал обмена валютных пар"<<std::endl;
 }
 
 void PrintExchange(Terminal* terminal,AccountData& account){
@@ -37,23 +35,40 @@ void PrintExchange(Terminal* terminal,AccountData& account){
     std::string first ;
     std::string second ;
     double amount;
+    AccountData buf = account;
     while(state){
-        std::cout<<"Введите название валюты для обмена"<<std::endl;
-        SafeCin(first,"");
-        SafeCin(second,"");
+        do
+        {
+            if(terminal->Exchange(buf,first,second,0.0!=0)){
+                std::cout<<"Некорректное наименование валют "<<std::endl;
+            }
+            std::cout<<"Введите название валюты для обмена"<<std::endl;
+            std::cout<<"\t-> ";
+            SafeCin(first,"");
+            std::cout<<"\t-> ";
+            SafeCin(second,"");
+        }    
+        while(terminal->Exchange(buf,first,second,0.0)!=0);
         std::string command;
         std::cout<<std::internal<<"Введите количество валюты "<<first<<" для обмена "<<std::endl;
+        std::cout<<"\t-> ";
         SafeCin(amount,"");  
-        AccountData buf = account;
         int code  = terminal->Exchange(buf,first,second,amount);
         switch (code)
         {
             case 0 :
-                if(second!="BTC"){
-                    std::cout<<"в результате обмена будет получено +"<<std::setprecision(2)<<buf.getCurrency(second)->count-account.getCurrency(second)->count<<" Валюты "<<second<<std::endl;
+                Delimeter(30,'-');
+                if(first!="BTC"){
+                    std::cout<<"В результате обмена будет списано "<<std::setprecision(2)<<std::setw(10)<<std::internal<<buf.getCurrency(first)->count-account.getCurrency(first)->count<<" Валюты "<<first<<std::endl;
                 }else{
-                    std::cout<<"в результате обмена будет получено +"<<std::setprecision(7)<<buf.getCurrency(second)->count-account.getCurrency(second)->count<<" Валюты "<<second<<std::endl;
+                    std::cout<<"В результате обмена будет списано "<<std::setprecision(7)<<std::setw(10)<<std::internal<<buf.getCurrency(first)->count-account.getCurrency(first)->count<<" Валюты "<<first<<std::endl;
                 }
+                if(second!="BTC"){
+                    std::cout<<"В результате обмена будет получено "<<std::setprecision(2)<<std::setw(10)<<std::internal<<buf.getCurrency(second)->count-account.getCurrency(second)->count<<" Валюты "<<second<<std::endl;
+                }else{
+                    std::cout<<"В результате обмена будет получено "<<std::setprecision(7)<<std::setw(10)<<std::internal<<buf.getCurrency(second)->count-account.getCurrency(second)->count<<" Валюты "<<second<<std::endl;
+                }
+                Delimeter(30,'-');
                 
                 std::cout<<"Желаете продолжить? yes/no"<<std::endl;
                 SafeCin(command,"");
@@ -65,7 +80,6 @@ void PrintExchange(Terminal* terminal,AccountData& account){
                     state = false;
                     Delimeter(30,'-');
                 } 
-                state = false;
                 break;
             case 1 :
                 std::cout<<"Некорректные данные для обмена"<<std::endl;
@@ -77,9 +91,9 @@ void PrintExchange(Terminal* terminal,AccountData& account){
                 std::cout<<"Недостаток средств на счёте терминала"<<std::endl;
                 break;
         }
+        Delimeter(30,'-');
     }
-    
-    terminal->Exchange(account,first,second,amount);
+    account = buf;
     std::cout<<"Операция выполнена успешно"<<std::endl;
     Delimeter(30,'+');
     terminal->PrintPersonalAccount(account);

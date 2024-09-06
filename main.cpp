@@ -30,8 +30,9 @@ int main(){
     std::cout<<code1<<std::endl;
     std::cout<<code2<<std::endl;
     */
+    Delimeter(80,'=');
     PrintMain();
-    Delimeter(50,'=');
+    Delimeter(80,'=');
     while(isActive){
         Delimeter(30,'-');
         terminal->PrintCurrencyRate();
